@@ -1,4 +1,4 @@
-NIM = 24130500009
-Email = zakielbavarian@gmail.com
-Github_Username = zaki-khairi
-Short_Bio = Hi i am Frontend Developer who loves learn about any Tech
+<h3>24130500009</h3>
+<h3>zakielbavarian@gmail.com</h3>
+<h3>zaki-khairi</h3>
+<h3>Hi i am Frontend Developer who loves learn about any Tech</h3>
