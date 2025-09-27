@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "username": "mateo09",
+      "name": "Mateo",
+      "email": "marteo09@gmail.com",
+      "role": "buyer"
+    },
+    {
+      "username": "jane_princess",
+      "name": "Jane",
+      "email": "jane_princess@gmail.com",
+      "role": "seller"
+    },
+    {
+      "username": "xavier_knight",
+      "name": "Xavier",
+      "email": "xavierknight@gmail.com",
+      "role": "seller"
+    },
+    {
+      "username": "gogon17",
+      "name": "Gogon",
+      "email": "gogon17@gmail.com",
+      "role": "buyer",
+      "createdAt": "2025-09-27T07:08:40.726Z",
+      "updatedAt": "2025-09-27T07:08:40.726Z"
+    }
+  ]
+}
