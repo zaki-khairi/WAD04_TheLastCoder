@@ -1,0 +1,17 @@
+{
+  "carts": [
+    {
+      "username": "gogon17",
+      "product_details": [
+        {
+          "product_name": "Gelang",
+          "total_price": 150000
+        },
+        {
+          "product_name": "Headphone",
+          "total_price": 450000
+        }
+      ]
+    }
+  ]
+}
