@@ -1,0 +1,18 @@
+{
+  "products": [
+    {
+      "product_name": "Earphone",
+      "product_category": "Elektronik",
+      "price": 150000,
+      "owner": "Gary"
+    },
+    {
+      "product_name": "Gelang",
+      "product_category": "Aksesoris",
+      "price": 150000,
+      "owner": "jane_princess",
+      "createdAt": "2025-09-28T00:48:17.759Z",
+      "updatedAt": "2025-09-28T00:48:17.759Z"
+    }
+  ]
+}
