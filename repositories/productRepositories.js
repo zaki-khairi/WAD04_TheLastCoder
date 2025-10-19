@@ -1,63 +1,47 @@
-const fs = require('fs');
-const path = require('path');
+const { Op } = require('sequelize');
+const db = require('../database'); 
+const { Product } = db;
 
-const productsPath = path.resolve(__dirname, '..', 'products.json');
-
-function readProductsFile() {
-  const raw = fs.readFileSync(productsPath, 'utf8');
-  const { products = [] } = JSON.parse(raw || '{}');
-  return products;
-
+/**
+ * Buat user baru.
+ * @param {{product_name:string,product_category:string,price:integer,owner:string}} payload
+ * @param {{ transaction?: import('sequelize').Transaction }} [opts]
+ */
+async function create(payload, opts = {}) {
+  const product = await Product.create(payload, { transaction: opts.transaction });
+  return product.toJSON();
 }
 
-function writeProductsFile(products) {
-  const payload = JSON.stringify({ products }, null, 2);
-  fs.writeFileSync(productsPath, payload, 'utf8');
+/** Ambil satu user by PK (id) */
+async function findById(id) {
+  const product = await Product.findByPk(id);
+  return product ? product.toJSON() : null;
 }
 
-// --- Entity ---
-class Product {
-  constructor({ product_name, product_category, price, owner, createdAt, updatedAt }) {
-    this.product_name = product_name;
-    this.product_category = product_category,
-      this.price = price,
-      this.owner = owner,
-      this.createdAt = createdAt ?? new Date().toISOString();
-    this.updatedAt = updatedAt ?? new Date().toISOString();
-  }
-
-  static findAll() {
-    return readProductsFile().map((p) => new Product(p));
-  }
-
-  static findByProductName(name) {
-    const productName = String(name).toLowerCase();
-
-    const data = readProductsFile().find(
-      (p) => String(p.product_name).toLowerCase() === productName
-    );
-    return data ? new Product(data) : null;
-  }
-
-  static getPriceByName(name) {
-    const p = Product.findByName(name);
-    return p && p.price != null ? Number(p.price) : null;
-  }
-
-  static createProduct({ product_name, product_category, price, owner }) {
-    const products = readProductsFile();
-    const now = new Date().toISOString();
-    const product = new Product({
-      product_name: String(product_name).trim(),
-      product_category: String(product_category).trim(),
-      price: String(price).trim(),
-      owner: String(owner).trim(),
-      createdAt: now,
-      updatedAt: now,
-    });
-    writeProductsFile([...products, product]);
-    return product;
-  }
+async function findByProductName(name) {
+  return await Product.findOne({
+    where: { product_name: { [Op.iLike]: String(name).trim() } },
+    attributes: ['id','product_name','price'],
+    raw: true,
+  });
 }
 
-module.exports = { Product };
+async function findAll() {
+  const rows = await Product.findAll({ raw: true })
+  return rows
+}
+
+/** Hapus user by id; return true jika ada yang terhapus */
+async function deleteById(id, opts = {}) {
+  const deleted = await Product.destroy({ where: { id }, transaction: opts.transaction });
+  return deleted > 0;
+}
+
+
+module.exports = { 
+  create,
+  findById,
+  findByProductName,
+  findAll,
+  deleteById,
+};

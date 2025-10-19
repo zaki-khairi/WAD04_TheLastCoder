@@ -1,8 +1,8 @@
-const { getAllProducts, getProductByProductName, createProduct } = require('../services/productService');
+const svc = require('../services/productService');
 
-function listProducts(req, res, next) {
+async function listProducts(req, res, next) {
   try {
-    const allProducts = getAllProducts();
+    const allProducts = await svc.getAllProducts();
     res.status(200).json(allProducts);
   } catch (error) {
     next(error)
@@ -11,7 +11,7 @@ function listProducts(req, res, next) {
 
 async function listProductByName(req, res, next) {
   try {
-    const result = await getProductByProductName(req.params.product_name)
+    const result = await svc.getProductByProductName(req.params.product_name)
 
     if (!result.success) {
       res.status(result.code).json(result.message)
@@ -26,7 +26,7 @@ async function listProductByName(req, res, next) {
 
 async function newProduct(req, res, next) {	
 	try {
-		const result = await createProduct(req.body)
+		const result = await svc.createProduct(req.body)
 
 		if(!result.success) {
 			res.status(result.code).json(result.message)

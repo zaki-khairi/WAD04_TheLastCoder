@@ -1,6 +1,12 @@
+
 const express = require('express');
 const app = express();
 const PORT = 3000
+
+require('dotenv').config();
+
+// Initialize DB
+const db = require('./database');
 
 // Import routes
 const aboutUsRoutes = require('./routes/aboutUsRoute');
@@ -22,6 +28,19 @@ app.use('/carts', cartRoutes);
 // Base Routes
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>');
-})
+});
 
-app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`))
+(async () => {
+    try {
+        await db.sequelize.authenticate();
+        console.log("Database connected")
+
+        await db.sequelize.sync({ alter: true });
+        console.log("Tables syncronized")
+
+        app.listen(PORT, () => console.log('Server is running at http://localhost:3000'))
+    } catch (error) {
+        console.log("Database connection failed", error)
+    }
+})();
+
