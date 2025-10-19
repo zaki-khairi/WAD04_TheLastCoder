@@ -1,45 +1,43 @@
-const { getAllUsers, getUserByUsername, createUser } = require('../services/userServices');
+const svc = require('../services/userServices');
 
-function listUsers(req, res, next) {
-	try{
-		const allUsers = getAllUsers();
-		res.status(200).json(allUsers);
-	} catch (error) {
-		next(error)
-	}
+async function listUsers(req, res, next) {
+  try {
+    const r = await svc.getAllUsers();  
+
+    return res.status(200).json(r);
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function listUserByUsername(req, res, next) {
-	try {
-		const result = await getUserByUsername(req.params.username)
-		
-		if(!result.success) {
-			res.status(result.code).json(result.message)
-		} 
+  try {
+    const r = await svc.getUserByUsername(req.params.username);
 
-		res.status(200).json(result)
-	
-	} catch (error) {
-		next(error)
-	}
+    if (!r.success) {
+      return res.status(r.code).json({ message: r.message });
+    }
+
+    return res.status(200).json(r.data);
+  } catch (error) {
+    next(error);
+  }
 }
 
-async function newUser(req, res, next) {	
-	try {
-		const result = await createUser(req.body)
-
-		if(!result.success) {
-			res.status(result.code).json(result.message)
-		}
-		
-		res.status(200).json(result)
-	} catch (error) {
-		next(error)	
-	}
+async function newUser(req, res, next) {
+  try {
+    const r = await svc.createUser(req.body);
+    if (!r.success) {
+      return res.status(r.code || 400).json({ message: r.message });
+    }
+    return res.status(201).json(r.user);
+  } catch (e) {
+    next(e);
+  }
 }
 
-module.exports = { 
-	listUserByUsername, 
-	listUsers,
-	newUser
+module.exports = {
+  listUsers,
+  listUserByUsername,
+  newUser,
 };

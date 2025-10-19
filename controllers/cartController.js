@@ -1,4 +1,4 @@
-const { getAllCarts, getCartByUsername, addToCart, removeToCart } = require('../services/cartService');
+const svc = require('../services/cartService');
 
 function listCarts(req, res, next) {
   try {
@@ -11,13 +11,9 @@ function listCarts(req, res, next) {
 
 async function listCartByUsername(req, res, next) {
   try {
-    const result = await getCartByUsername(req.params.username)
-
-    if (!result.success) {
-      res.status(result.code).json(result.message)
-    }
-
-    res.status(200).json(result)
+    const r = await svc.getCartByUsername(req.params.username);
+    if (!r.success) return res.status(r.code).json({ message: r.message });
+    return res.status(200).json(r.data);
 
   } catch (error) {
     next(error)
@@ -26,13 +22,14 @@ async function listCartByUsername(req, res, next) {
 
 async function addCart(req, res, next) {	
 	try {
-		const result = await addToCart(req.body)
+		const r = await svc.addToCart({
+      username: req.params.username,
+      product_name: req.body.product_name,
+      qty: req.body.qty
+    });
+    if (!r.success) return res.status(r.code).json({ message: r.message });
+    return res.status(200).json({ message: 'Added', cart_id: r.cart_id });
 
-		if(!result.success) {
-			res.status(result.code).json(result.message)
-		} 
-			
-    res.status(200).json(result)
 	} catch (error) {
 		next(error)	
 	}
@@ -40,13 +37,12 @@ async function addCart(req, res, next) {
 
 async function removeCart(req, res, next) {	
 	try {
-		const result = await removeToCart(req.body)
-
-		if(!result.success) {
-			res.status(result.code).json(result.message)
-		} 
-			
-    res.status(200).json(result)
+		const r = await svc.removeFromCart({
+      username: req.params.username,
+      product_name: req.body.product_name
+    });
+    if (!r.success) return res.status(r.code).json({ message: r.message });
+    return res.status(200).json({ message: 'Removed' });
 	} catch (error) {
 		next(error)	
 	}

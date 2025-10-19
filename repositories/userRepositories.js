@@ -1,67 +1,63 @@
-const fs = require('fs');
-const path = require('path');
 
-const usersPath = path.resolve(__dirname, '..', 'users.json');
+const { Op } = require('sequelize');
+const db = require('../database'); 
+const { User } = db;
 
-function readUsersFile() {
-    const raw = fs.readFileSync(usersPath, 'utf8');
-    const { users = [] } = JSON.parse(raw || '{}');
-    return users;
-  
+/**
+ * Buat user baru.
+ * @param {{username:string,name:string,email:string,role:string}} payload
+ * @param {{ transaction?: import('sequelize').Transaction }} [opts]
+ */
+async function create(payload, opts = {}) {
+  // diasumsikan unique index di model (username, email)
+  const user = await User.create(payload, { transaction: opts.transaction });
+  return user.toJSON();
 }
 
-function writeUsersFile(users) {
-  const payload = JSON.stringify({ users }, null, 2);
-  fs.writeFileSync(usersPath, payload, 'utf8');
+/** Ambil satu user by PK (id) */
+async function findById(id) {
+  const user = await User.findByPk(id);
+  return user ? user.toJSON() : null;
 }
 
-// --- Entity ---
-class User {
-  constructor({ username, name, email, role, createdAt, updatedAt }) {
-    this.username  = username;
-    this.name      = name;
-    this.email     = email;
-    this.role      = role;
-    this.createdAt = createdAt ?? new Date().toISOString();
-    this.updatedAt = updatedAt ?? new Date().toISOString();
-  }
-
-  static findAll() {
-    return readUsersFile().map((u) => new User(u));
-  }
-
-  static findByUsername(username) {
-    const uname = String(username || '').toLowerCase();
-    const data = readUsersFile().find(
-      (u) => String(u.username || '').toLowerCase() === uname
-    );
-    return data ? new User(data) : null;
-  }
-
-  static existsUsernameOrEmail(data) {
-    const uname = String(data.username || '').toLowerCase();
-    const mail  = String(data.email || '').toLowerCase();
-    return readUsersFile().some(
-      (u) =>
-        String(u.username || '').toLowerCase() === uname ||
-        String(u.email || '').toLowerCase() === mail
-    );
-  }
-
-  static createUser({ username, name, email, role }) {
-    const users = readUsersFile();
-    const now  = new Date().toISOString();
-    const user = new User({
-      username: String(username).trim(),
-      name: String(name).trim(),
-      email: String(email).trim(),
-      role: String(role).trim(),
-      createdAt: now,
-      updatedAt: now,
-    });
-    writeUsersFile([...users, user]);
-    return user;
-  }
+async function findByUsername(username) {
+  return await User.findOne({
+    where: { username: { [Op.iLike]: String(username).trim() } },
+    raw: true,
+  });
 }
 
-module.exports = { User };
+async function findAll() {
+  const rows = await User.findAll({ raw: true })
+  return rows
+}
+
+
+/** Hapus user by id; return true jika ada yang terhapus */
+async function deleteById(id, opts = {}) {
+  const deleted = await User.destroy({ where: { id }, transaction: opts.transaction });
+  return deleted > 0;
+}
+
+/** Cek duplikasi username/email */
+async function existsUsernameOrEmail({ username, email }) {
+  const found = await User.findOne({
+    where: {
+      [Op.or]: [
+        { username: { [Op.iLike]: String(username) } },
+        { email:    { [Op.iLike]: String(email) } },
+      ],
+    },
+    attributes: ['id'],
+  });
+  return !!found;
+}
+
+module.exports = {
+  create,
+  findById,
+  findByUsername,
+  findAll,
+  deleteById,
+  existsUsernameOrEmail,
+};
